@@ -29,7 +29,7 @@ class UsersController extends Controller
         ]);
         if ($request->avatar) {
             $result = $handler->save($request->avatar, 'avatars', $user
-            ->id);
+            ->id, 416);
             if ($result) {
                 $data['avatar'] = $result['path'];
             }
