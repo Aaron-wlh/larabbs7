@@ -13,3 +13,9 @@ function category_nav_active($route_name, $url_param) {
         return 'active';
     }
 }
+
+function make_excerpt($body, $length = 200) {
+    $excerpt = trim(preg_replace('/\r\n|\r|\n+/', '', strip_tags($body)));
+    $excerpt = \Illuminate\Support\Str::limit($excerpt, $length);
+    return $excerpt;
+}
