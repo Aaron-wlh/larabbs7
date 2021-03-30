@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Handlers\SlugTranslateHandler;
+use App\Jobs\TranslateSlug;
 use App\Models\Topic;
 
 // creating, created, updating, updated, saving,
@@ -14,8 +15,16 @@ class TopicObserver
     {
         $topic->body = clean($topic->body, 'user_topic_body');
         $topic->excerpt = make_excerpt($topic->body);
+
+    }
+
+
+    public function saved(Topic $topic)
+    {
+        //队列系统对于构造器里传入的 Eloquent 模型，将会只序列化 ID 字段
         if (! $topic->slug) {
-            $topic->slug = app(SlugTranslateHandler::class)->translate($topic->title);
+            // 推送任务到队列
+            dispatch(new TranslateSlug($topic));
         }
     }
 }
