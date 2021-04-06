@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
+
 class ReplyRequest extends Request
 {
     public function rules()
@@ -10,17 +12,13 @@ class ReplyRequest extends Request
         {
             // CREATE
             case 'POST':
-            {
-                return [
-                    // CREATE ROLES
-                ];
-            }
             // UPDATE
             case 'PUT':
             case 'PATCH':
             {
                 return [
-                    // UPDATE ROLES
+                    'content' => 'required|string|min:1',
+                    'topic_id' => Rule::exists('topics', 'id')
                 ];
             }
             case 'GET':
