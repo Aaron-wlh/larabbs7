@@ -21,10 +21,12 @@ class TopicObserver
 
     public function saved(Topic $topic)
     {
-        //队列系统对于构造器里传入的 Eloquent 模型，将会只序列化 ID 字段
-        if (! $topic->slug) {
-            // 推送任务到队列
-            dispatch(new TranslateSlug($topic));
+        if (!app()->runningInConsole()) {
+            //队列系统对于构造器里传入的 Eloquent 模型，将会只序列化 ID 字段
+            if (! $topic->slug) {
+                // 推送任务到队列
+                dispatch(new TranslateSlug($topic));
+            }
         }
     }
 

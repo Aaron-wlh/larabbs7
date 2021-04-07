@@ -22,9 +22,11 @@ class ReplyObserver
 
     public function created(Reply $reply)
     {
-        $reply->topic->updateReplyCount();
-        //数据库通知
-        $reply->topic->user->notify(new TopicReplied($reply));
+        if (!app()->runningInConsole()) {
+            $reply->topic->updateReplyCount();
+            //数据库通知
+            $reply->topic->user->notify(new TopicReplied($reply));
+        }
     }
 
     public function deleted(Reply $reply)
