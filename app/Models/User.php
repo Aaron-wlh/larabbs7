@@ -3,16 +3,19 @@
 namespace App\Models;
 
 use App\Models\Traits\ActiveUsersTrait;
+use App\Models\Traits\LastActivedAtHelper;
+use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Redis;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use ActiveUsersTrait;
+    use ActiveUsersTrait, LastActivedAtHelper;
 
     use HasRoles;
 
@@ -27,7 +30,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'avatar', 'introduction'
+        'name', 'email', 'password', 'avatar', 'introduction', 'last_actived_at'
     ];
 
     /**
@@ -101,5 +104,19 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         $this->attributes['avatar'] = $path;
+    }
+
+    public function getLastActivedAtAttribute($value)
+    {
+        //获取今日日期
+        $date = Carbon::now()->toDateString();
+        $hash = $this->getHashFromDateString($date);
+        $field = $this->getHashField();
+        $actived_at = Redis::hGet($hash, $field) ?: $value;
+        if ($actived_at) {
+            return new Carbon($actived_at);
+        } else {
+            return $this->created_at;
+        }
     }
 }
